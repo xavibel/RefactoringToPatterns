@@ -37,9 +37,7 @@ public class AddProperty
         int ownerId)
     {
         new PostalCode(postalCode);
-
-        if (price < 0)
-            throw new InvalidPriceException("Price cannot be negative");
+        new Price(price);
 
         var usersAsString = ReadJSONFileContent(usersFile);
         var users = JsonConvert.DeserializeObject<List<User>>(usersAsString);

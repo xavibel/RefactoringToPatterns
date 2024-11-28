@@ -52,9 +52,7 @@ public class AddAlert
         int? maximumSquareMeters)
     {
         new PostalCode(postalCode);
-        
-        if (minimumPrice < 0)
-            throw new InvalidPriceException("Price cannot be negative");
+        new Price(minimumPrice);
         
         if (minimumPrice.HasValue && maximumPrice.HasValue && minimumPrice > maximumPrice)
             throw new InvalidPriceException("The minimum price should be bigger than the maximum price");

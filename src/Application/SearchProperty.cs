@@ -23,9 +23,7 @@ public class SearchProperty
     public Property[] Search(string postalCode, int? minimumPrice, int? maximumPrice, int? minimumRooms, int? maximumRooms, int? minimumSquareMeters, int? maximumSquareMeters)
     {
         new PostalCode(postalCode);
-        
-        if (minimumPrice.HasValue && minimumPrice < 0) 
-            throw new InvalidPriceException("Price cannot be negative");
+        new Price(minimumPrice);
         
         if (minimumPrice.HasValue && maximumPrice.HasValue && minimumPrice > maximumPrice)
             throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
@@ -77,4 +75,3 @@ public class SearchProperty
         }
     }
 }
-
