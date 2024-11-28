@@ -12,4 +12,8 @@ public class PriceRange
         if (minPrice.Value > maxPrice.Value)
             throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
     }
+
+    public bool IsInRange(int propertyPrice) =>
+        (!MinPrice.Value.HasValue || propertyPrice >= MinPrice.Value) &&
+        (!MaxPrice.Value.HasValue || propertyPrice <= MaxPrice.Value);
 }
