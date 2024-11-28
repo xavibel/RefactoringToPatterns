@@ -40,36 +40,27 @@ public class AddAlert
         return Enum.TryParse(typeof(AlertType), alertType.ToUpper(), out _);
     }
 
-    public void Execute(
-        int userId,
-        string alertType,
-        string postalCode,
-        int? minimumPrice,
-        int? maximumPrice,
-        int? minimumRooms,
-        int? maximumRooms,
-        int? minimumSquareMeters,
-        int? maximumSquareMeters)
+    public void Execute(AddAlertCommand addAlertCommand)
     {
-        new PostalCode(postalCode);
-        new Price(minimumPrice);
-        PriceRange.FromInt(minimumPrice, maximumPrice);
+        new PostalCode(addAlertCommand.PostalCode);
+        new Price(addAlertCommand.MinimumPrice);
+        PriceRange.FromInt(addAlertCommand.MinimumPrice, addAlertCommand.MaximumPrice);
 
-        if (!IsAlertTypeValid(alertType))
-            throw new InvalidAlertTypeException($"The alert type {alertType} does not exist");
+        if (!IsAlertTypeValid(addAlertCommand.AlertType))
+            throw new InvalidAlertTypeException($"The alert type {addAlertCommand.AlertType} does not exist");
 
         var usersAsString = ReadJsonFileContent(usersFile);
         var users = JsonConvert.DeserializeObject<List<User>>(usersAsString);
-        var userExists = users.Any(user => user.Id == userId);
+        var userExists = users.Any(user => user.Id == addAlertCommand.UserId);
 
         if (!userExists)
-            throw new InvalidUserIdException($"The user {userId} does not exist");
+            throw new InvalidUserIdException($"The user {addAlertCommand.UserId} does not exist");
 
         var alerts = ReadAlerts();
-        var alert = new Alert(userId, alertType, postalCode, minimumPrice, maximumPrice,
-            minimumRooms,
-            maximumRooms,
-            minimumSquareMeters, maximumSquareMeters);
+        var alert = new Alert(addAlertCommand.UserId, addAlertCommand.AlertType, addAlertCommand.PostalCode, addAlertCommand.MinimumPrice, addAlertCommand.MaximumPrice,
+            addAlertCommand.MinimumRooms,
+            addAlertCommand.MaximumRooms,
+            addAlertCommand.MinimumSquareMeters, addAlertCommand.MaximumSquareMeters);
         alerts.Add(alert);
 
         try
@@ -84,15 +75,15 @@ public class AddAlert
         {
             var data = new Dictionary<string, object>
             {
-                { "userId", userId },
-                { "alertType", alertType },
-                { "postalCode", postalCode },
-                { "minimumPrice", minimumPrice },
-                { "maximumPrice", maximumPrice },
-                { "minimumRooms", minimumRooms },
-                { "maximumRooms", maximumRooms },
-                { "minimumSquareMeters", minimumSquareMeters },
-                { "maximumSquareMeters", maximumSquareMeters }
+                { "userId", addAlertCommand.UserId },
+                { "alertType", addAlertCommand.AlertType },
+                { "postalCode", addAlertCommand.PostalCode },
+                { "minimumPrice", addAlertCommand.MinimumPrice },
+                { "maximumPrice", addAlertCommand.MaximumPrice },
+                { "minimumRooms", addAlertCommand.MinimumRooms },
+                { "maximumRooms", addAlertCommand.MaximumRooms },
+                { "minimumSquareMeters", addAlertCommand.MinimumSquareMeters },
+                { "maximumSquareMeters", addAlertCommand.MaximumSquareMeters }
             };
 
             if (addDateToLogger)

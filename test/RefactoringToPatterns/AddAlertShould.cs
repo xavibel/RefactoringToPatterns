@@ -22,7 +22,7 @@ public class AddAlertShould : IDisposable
     {
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        addAlert.Execute(1, "email", "08030", 0, 100_000, 0, 3, 30, 200);
+        addAlert.Execute(new AddAlertCommand(1, "email", "08030", 0, 100_000, 0, 3, 30, 200));
 
         var content = File.ReadAllText(ALERTS_FILE);
         var alerts = JsonConvert.DeserializeObject<List<Alert>>(content);
@@ -45,7 +45,7 @@ public class AddAlertShould : IDisposable
     {
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        addAlert.Execute(1, "email", "08030", null, null, null, null, null, null);
+        addAlert.Execute(new AddAlertCommand(1, "email", "08030", null, null, null, null, null, null));
 
         var content = File.ReadAllText(ALERTS_FILE);
         var alerts = JsonConvert.DeserializeObject<List<Alert>>(content);
@@ -65,8 +65,8 @@ public class AddAlertShould : IDisposable
     {
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        addAlert.Execute(1, "email", "08030", null, null, null, null, null, null);
-        addAlert.Execute(1, "email", "08030", null, null, null, null, null, null);
+        addAlert.Execute(new AddAlertCommand(1, "email", "08030", null, null, null, null, null, null));
+        addAlert.Execute(new AddAlertCommand(1, "email", "08030", null, null, null, null, null, null));
 
         var content = File.ReadAllText(ALERTS_FILE);
         var alerts = JsonConvert.DeserializeObject<List<Alert>>(content);
@@ -78,7 +78,7 @@ public class AddAlertShould : IDisposable
     {
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        Action action = () => addAlert.Execute(1, "email", "080300", null, null, null, null, null, null);
+        Action action = () => addAlert.Execute(new AddAlertCommand(1, "email", "080300", null, null, null, null, null, null));
 
         action.Should().Throw<InvalidPostalCodeException>()
             .WithMessage("080300 is not a valid postal code");
@@ -89,7 +89,7 @@ public class AddAlertShould : IDisposable
     {
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        Action action = () => addAlert.Execute(1, "email", "08030", -1, null, null, null, null, null);
+        Action action = () => addAlert.Execute(new AddAlertCommand(1, "email", "08030", -1, null, null, null, null, null));
 
         action.Should().Throw<InvalidPriceException>()
             .WithMessage("Price cannot be negative");
@@ -100,7 +100,7 @@ public class AddAlertShould : IDisposable
     {
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        Action action = () => addAlert.Execute(1, "email", "08030", 100_001, 100_000, null, null, null, null);
+        Action action = () => addAlert.Execute(new AddAlertCommand(1, "email", "08030", 100_001, 100_000, null, null, null, null));
 
         action.Should().Throw<InvalidPriceException>()
             .WithMessage("The minimum price should be bigger than the maximum price");
@@ -111,7 +111,7 @@ public class AddAlertShould : IDisposable
     {
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        Action action = () => addAlert.Execute(NON_EXISTING_USER, "email", "08030", null, null, null, null, null, null);
+        Action action = () => addAlert.Execute(new AddAlertCommand(NON_EXISTING_USER, "email", "08030", null, null, null, null, null, null));
 
         action.Should().Throw<InvalidUserIdException>()
             .WithMessage($"The user {NON_EXISTING_USER} does not exist");
@@ -122,7 +122,7 @@ public class AddAlertShould : IDisposable
     {
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        Action action = () => addAlert.Execute(1, "asdf", "08030", null, null, null, null, null, null);
+        Action action = () => addAlert.Execute(new AddAlertCommand(1, "asdf", "08030", null, null, null, null, null, null));
 
         action.Should().Throw<InvalidAlertTypeException>()
             .WithMessage("The alert type asdf does not exist");
@@ -136,7 +136,7 @@ public class AddAlertShould : IDisposable
     {
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, null, false);
 
-        addAlert.Execute(1, alertType, "08030", null, null, null, null, null, null);
+        addAlert.Execute(new AddAlertCommand(1, alertType, "08030", null, null, null, null, null, null));
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class AddAlertShould : IDisposable
         var logger = new InMemoryLogger();
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, logger, false);
 
-        addAlert.Execute(1, "email", "08030", 0, 100_000, 0, 3, 30, 200);
+        addAlert.Execute(new AddAlertCommand(1, "email", "08030", 0, 100_000, 0, 3, 30, 200));
 
         logger.GetLoggedData().Should().HaveCount(1);
         var loggedData = logger.GetLoggedData().First();
@@ -166,7 +166,7 @@ public class AddAlertShould : IDisposable
         var logger = new InMemoryLogger();
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, logger, true);
 
-        addAlert.Execute(1, "email", "08030", 0, 100_000, 0, 3, 30, 200);
+        addAlert.Execute(new AddAlertCommand(1, "email", "08030", 0, 100_000, 0, 3, 30, 200));
 
         var loggedData = logger.GetLoggedData().First();
         loggedData.ContainsKey("date").Should().BeTrue();
@@ -178,7 +178,7 @@ public class AddAlertShould : IDisposable
         var logger = new InMemoryLogger();
         var addAlert = new AddAlert(ALERTS_FILE, USERS_FILE, logger, false);
 
-        addAlert.Execute(1, "email", "08030", 0, 100_000, 0, 3, 30, 200);
+        addAlert.Execute(new AddAlertCommand(1, "email", "08030", 0, 100_000, 0, 3, 30, 200));
 
         var loggedData = logger.GetLoggedData().First();
         loggedData.ContainsKey("date").Should().BeFalse();
