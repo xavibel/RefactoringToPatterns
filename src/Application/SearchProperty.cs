@@ -79,12 +79,3 @@ public class SearchProperty
     }
 }
 
-public class InvalidPostalCodeException : Exception
-{
-    public InvalidPostalCodeException(string message) : base(message) { }
-}
-
-public class InvalidPriceException : Exception
-{
-    public InvalidPriceException(string message) : base(message) { }
-}
