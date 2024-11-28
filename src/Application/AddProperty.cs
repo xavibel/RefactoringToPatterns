@@ -36,8 +36,7 @@ public class AddProperty
     public void Execute(int id, string description, string postalCode, int price, int numberOfRooms, int squareMeters,
         int ownerId)
     {
-        if (!Regex.IsMatch(postalCode, @"^\d{5}$"))
-            throw new InvalidPostalCodeException(postalCode + " is not a valid postal code");
+        new PostalCode(postalCode);
 
         if (price < 0)
             throw new InvalidPriceException("Price cannot be negative");

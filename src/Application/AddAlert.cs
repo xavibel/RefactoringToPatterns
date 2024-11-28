@@ -51,8 +51,7 @@ public class AddAlert
         int? minimumSquareMeters,
         int? maximumSquareMeters)
     {
-        if (!Regex.IsMatch(postalCode, @"^\d{5}$"))
-            throw new InvalidPostalCodeException($"{postalCode} is not a valid postal code");
+        new PostalCode(postalCode);
         
         if (minimumPrice < 0)
             throw new InvalidPriceException("Price cannot be negative");
