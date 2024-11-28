@@ -22,53 +22,48 @@ public class SearchProperty
 
     public Property[] Search(string postalCode, int? minimumPrice, int? maximumPrice, int? minimumRooms, int? maximumRooms, int? minimumSquareMeters, int? maximumSquareMeters)
     {
-        if (Regex.IsMatch(postalCode, "^\\d{5}$"))
+        if (!Regex.IsMatch(postalCode, "^\\d{5}$"))
+            throw new InvalidPostalCodeException($"{postalCode} is not a valid postal code");
+        
+        if (minimumPrice.HasValue && minimumPrice < 0) 
+            throw new InvalidPriceException("Price cannot be negative");
+        
+        if (minimumPrice.HasValue && maximumPrice.HasValue && minimumPrice > maximumPrice)
+            throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
+        
+        string propertiesAsString = ReadPropertiesFile();
+        Property[] allProperties = JsonConvert.DeserializeObject<Property[]>(propertiesAsString);
+
+        var properties = allProperties
+            .Where(property => property.PostalCode == postalCode)
+            .Where(property => (!minimumPrice.HasValue || property.Price >= minimumPrice.Value) &&
+                               (!maximumPrice.HasValue || property.Price <= maximumPrice.Value))
+            .Where(property => (!minimumRooms.HasValue || property.NumberOfRooms >= minimumRooms.Value) &&
+                               (!maximumRooms.HasValue || property.NumberOfRooms <= maximumRooms.Value))
+            .Where(property =>
+                (!minimumSquareMeters.HasValue || property.SquareMeters >= minimumSquareMeters.Value) &&
+                (!maximumSquareMeters.HasValue || property.SquareMeters <= maximumSquareMeters.Value))
+            .ToArray();
+
+        if (logger != null)
         {
-            if (!minimumPrice.HasValue || !(minimumPrice < 0))
+            var data = new Dictionary<string, object>
             {
-                if (!minimumPrice.HasValue || !maximumPrice.HasValue || !(minimumPrice > maximumPrice))
-                {
-                    string propertiesAsString = ReadPropertiesFile();
-                    Property[] allProperties = JsonConvert.DeserializeObject<Property[]>(propertiesAsString);
+                { "postalCode", postalCode },
+                { "minimumPrice", minimumPrice },
+                { "maximumPrice", maximumPrice }
+            };
 
-                    var properties = allProperties
-                        .Where(property => property.PostalCode == postalCode)
-                        .Where(property => (!minimumPrice.HasValue || property.Price >= minimumPrice.Value) &&
-                                           (!maximumPrice.HasValue || property.Price <= maximumPrice.Value))
-                        .Where(property => (!minimumRooms.HasValue || property.NumberOfRooms >= minimumRooms.Value) &&
-                                           (!maximumRooms.HasValue || property.NumberOfRooms <= maximumRooms.Value))
-                        .Where(property =>
-                            (!minimumSquareMeters.HasValue || property.SquareMeters >= minimumSquareMeters.Value) &&
-                            (!maximumSquareMeters.HasValue || property.SquareMeters <= maximumSquareMeters.Value))
-                        .ToArray();
-
-                    if (logger != null)
-                    {
-                        var data = new Dictionary<string, object>
-                        {
-                            { "postalCode", postalCode },
-                            { "minimumPrice", minimumPrice },
-                            { "maximumPrice", maximumPrice }
-                        };
-
-                        if (addDateToLogger)
-                        {
-                            data["date"] = DateTime.Now;
-                        }
-
-                        logger.Log(data);
-                    }
-
-                    return properties;
-                }
-
-                throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
+            if (addDateToLogger)
+            {
+                data["date"] = DateTime.Now;
             }
 
-            throw new InvalidPriceException("Price cannot be negative");
+            logger.Log(data);
         }
 
-        throw new InvalidPostalCodeException($"{postalCode} is not a valid postal code");
+        return properties;
+
     }
 
     private string ReadPropertiesFile()
