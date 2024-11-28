@@ -2,9 +2,9 @@
 
 public record RoomRange(int? minimumRooms, int? maximumRooms)
 {
-    public bool IsInRange(Property property)
+    public bool IsInRange(int numberOfRooms)
     {
-        return (!minimumRooms.HasValue || property.NumberOfRooms >= minimumRooms.Value) &&
-               (!maximumRooms.HasValue || property.NumberOfRooms <= maximumRooms.Value);
+        return (!minimumRooms.HasValue || numberOfRooms >= minimumRooms.Value) &&
+               (!maximumRooms.HasValue || numberOfRooms <= maximumRooms.Value);
     }
 }
