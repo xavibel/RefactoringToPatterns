@@ -53,9 +53,7 @@ public class AddAlert
     {
         new PostalCode(postalCode);
         new Price(minimumPrice);
-        
-        if (minimumPrice.HasValue && maximumPrice.HasValue && minimumPrice > maximumPrice)
-            throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
+        new PriceRange(new Price(minimumPrice), new Price(maximumPrice));
         
         if (!IsAlertTypeValid(alertType))
             throw new InvalidAlertTypeException($"The alert type {alertType} does not exist");

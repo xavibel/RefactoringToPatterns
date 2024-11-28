@@ -24,9 +24,7 @@ public class SearchProperty
     {
         new PostalCode(postalCode);
         new Price(minimumPrice);
-        
-        if (minimumPrice.HasValue && maximumPrice.HasValue && minimumPrice > maximumPrice)
-            throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
+        new PriceRange(new Price(minimumPrice), new Price(maximumPrice));
         
         string propertiesAsString = ReadPropertiesFile();
         Property[] allProperties = JsonConvert.DeserializeObject<Property[]>(propertiesAsString);

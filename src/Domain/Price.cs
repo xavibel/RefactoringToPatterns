@@ -2,9 +2,13 @@
 
 public class Price
 {
-    public Price(int? minimumPrice)
+    public int? Value { get; }
+
+    public Price(int? price)
     {
-        if (minimumPrice.HasValue && minimumPrice < 0) 
+        if (price is < 0) 
             throw new InvalidPriceException("Price cannot be negative");
+
+        Value = price;
     }
 }
