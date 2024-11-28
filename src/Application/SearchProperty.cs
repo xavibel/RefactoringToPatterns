@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
 namespace RefactoringToPatterns;
+
 public class SearchProperty
 {
     private readonly string propertiesFile;
@@ -25,15 +26,15 @@ public class SearchProperty
         new PostalCode(postalCode);
         new Price(minimumPrice);
         var priceRange = new PriceRange(new Price(minimumPrice), new Price(maximumPrice));
-
+        var roomRange = new RoomRange(minimumRooms, maximumRooms);
+        
         string propertiesAsString = ReadPropertiesFile();
         Property[] allProperties = JsonConvert.DeserializeObject<Property[]>(propertiesAsString);
 
         var properties = allProperties
             .Where(property => property.PostalCode == postalCode)
             .Where(property => priceRange.IsInRange(property.Price))
-            .Where(property => (!minimumRooms.HasValue || property.NumberOfRooms >= minimumRooms.Value) &&
-                               (!maximumRooms.HasValue || property.NumberOfRooms <= maximumRooms.Value))
+            .Where(property => roomRange.IsInRange(property))
             .Where(property =>
                 (!minimumSquareMeters.HasValue || property.SquareMeters >= minimumSquareMeters.Value) &&
                 (!maximumSquareMeters.HasValue || property.SquareMeters <= maximumSquareMeters.Value))
