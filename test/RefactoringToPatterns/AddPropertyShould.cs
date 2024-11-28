@@ -21,19 +21,21 @@ public class AddPropertyShould: IDisposable
     private readonly EmailSender emailSender;
     private readonly SmsSender smsSender;
     private readonly PushSender pushSender;
+    private readonly AddPropertyCommandTestBuilder addPropertyCommandTestBuilder;
 
     public AddPropertyShould()
     {
         emailSender = new Mock<EmailSender>().Object;
         smsSender = new Mock<SmsSender>().Object;
         pushSender = new Mock<PushSender>().Object;
+        addPropertyCommandTestBuilder = new AddPropertyCommandTestBuilder();
     }
     [Fact]
     public void NewValidPropertyCanBeRetrieved()
     {
         var addProperty = NewAddProperty();
 
-        addProperty.Execute(new AddPropertyCommand(123, "New property", "04600", 140_000, 3, 160, 1));
+        addProperty.Execute(addPropertyCommandTestBuilder.Build());
 
         var propertiesAsString = File.ReadAllText(PROPERTIES);
         var allProperties = JsonSerializer.Deserialize<Property[]>(propertiesAsString);
