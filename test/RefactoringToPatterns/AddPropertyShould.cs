@@ -18,16 +18,16 @@ public class AddPropertyShould: IDisposable
     private static readonly string ALERTS = "tmpTestAlerts.json";
     private static readonly int NON_EXISTING_OWNER = 999999;
     private static readonly string USERS_FILE = "resources/testUsers.json";
-    private readonly EmailSender emailSender;
-    private readonly SmsSender smsSender;
-    private readonly PushSender pushSender;
+    private readonly IEmailSender emailSender;
+    private readonly ISmsSender smsSender;
+    private readonly IPushSender pushSender;
     private readonly AddPropertyCommandTestBuilder addPropertyCommandTestBuilder;
 
     public AddPropertyShould()
     {
-        emailSender = new Mock<EmailSender>().Object;
-        smsSender = new Mock<SmsSender>().Object;
-        pushSender = new Mock<PushSender>().Object;
+        emailSender = new Mock<IEmailSender>().Object;
+        smsSender = new Mock<ISmsSender>().Object;
+        pushSender = new Mock<IPushSender>().Object;
         addPropertyCommandTestBuilder = new AddPropertyCommandTestBuilder();
     }
     [Fact]
@@ -99,7 +99,7 @@ public class AddPropertyShould: IDisposable
         var alert = new Alert(2, "email", "04600", null, null, null, null, null, null);
         File.WriteAllText(ALERTS, JsonSerializer.Serialize(new List<Alert> { alert }));
         var emailSenderMock = new Mock<IEmailSender>();
-        var addProperty = NewAddProperty();
+        var addProperty = NewAddPropertyWithEmailSender(emailSenderMock.Object);
 
         addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
@@ -116,7 +116,7 @@ public class AddPropertyShould: IDisposable
         var alert = new Alert(2, "sms", "04600", null, null, null, null, null, null);
         File.WriteAllText(ALERTS, JsonSerializer.Serialize(new List<Alert> { alert }));
         var smsSenderMock = new Mock<ISmsSender>();
-        var addProperty = NewAddProperty();
+        var addProperty = NewAddPropertyWithSmsSender(smsSenderMock.Object);
 
         addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
@@ -132,7 +132,7 @@ public class AddPropertyShould: IDisposable
         var alert = new Alert(2, "push", "04600", null, null, null, null, null, null);
         File.WriteAllText(ALERTS, JsonSerializer.Serialize(new List<Alert> { alert }));
         var pushSenderMock = new Mock<IPushSender>();
-        var addProperty = NewAddProperty();
+        var addProperty = NewAddPropertyWithPushSender(pushSenderMock.Object);
 
         addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
@@ -190,6 +190,23 @@ public class AddPropertyShould: IDisposable
         return NewAddPropertyWithLogger(null, false);
     }
 
+    private AddProperty NewAddPropertyWithSmsSender(ISmsSender sender)
+    {
+        return new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
+            sender, pushSender, null, false);
+    }
+    
+    private AddProperty NewAddPropertyWithPushSender(IPushSender sender)
+    {
+        return new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
+            smsSender, sender, null, false);
+    }
+    
+    private AddProperty NewAddPropertyWithEmailSender(IEmailSender sender)
+    {
+        return new AddProperty(PROPERTIES, USERS_FILE, sender, ALERTS,
+            smsSender, pushSender, null, false);
+    }
     private AddProperty NewAddPropertyWithLogger(InMemoryLogger? loggerMock, bool addDateToLogger)
     {
         return new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
