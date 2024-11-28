@@ -51,82 +51,59 @@ public class AddAlert
         int? minimumSquareMeters,
         int? maximumSquareMeters)
     {
-        if (Regex.IsMatch(postalCode, @"^\d{5}$"))
-        {
-            if (!(minimumPrice < 0))
-            {
-                if (!minimumPrice.HasValue || !maximumPrice.HasValue || !(minimumPrice > maximumPrice))
-                {
-                    if (IsAlertTypeValid(alertType))
-                    {
-                        var usersAsString = ReadJsonFileContent(usersFile);
-                        var users = JsonConvert.DeserializeObject<List<User>>(usersAsString);
-                        var userExists = users.Any(user => user.Id == userId);
-
-                        if (userExists)
-                        {
-                            var alerts = ReadAlerts();
-                            var alert = new Alert(userId, alertType, postalCode, minimumPrice, maximumPrice,
-                                minimumRooms,
-                                maximumRooms,
-                                minimumSquareMeters, maximumSquareMeters);
-                            alerts.Add(alert);
-
-                            try
-                            {
-                                File.WriteAllText(alertsFile, JsonConvert.SerializeObject(alerts));
-                            }
-                            catch (IOException)
-                            {
-                                // Handle exception as needed
-                            }
-
-                            if (logger != null)
-                            {
-                                var data = new Dictionary<string, object>
-                                {
-                                    { "userId", userId },
-                                    { "alertType", alertType },
-                                    { "postalCode", postalCode },
-                                    { "minimumPrice", minimumPrice },
-                                    { "maximumPrice", maximumPrice },
-                                    { "minimumRooms", minimumRooms },
-                                    { "maximumRooms", maximumRooms },
-                                    { "minimumSquareMeters", minimumSquareMeters },
-                                    { "maximumSquareMeters", maximumSquareMeters }
-                                };
-
-                                if (addDateToLogger)
-                                {
-                                    data["date"] = DateTime.Now;
-                                }
-
-                                logger.Log(data);
-                            }
-                        }
-                        else
-                        {
-                            throw new InvalidUserIdException($"The user {userId} does not exist");
-                        }
-                    }
-                    else
-                    {
-                        throw new InvalidAlertTypeException($"The alert type {alertType} does not exist");
-                    }
-                }
-                else
-                {
-                    throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
-                }
-            }
-            else
-            {
-                throw new InvalidPriceException("Price cannot be negative");
-            }
-        }
-        else
-        {
+        if (!Regex.IsMatch(postalCode, @"^\d{5}$"))
             throw new InvalidPostalCodeException($"{postalCode} is not a valid postal code");
+        
+        if (minimumPrice < 0)
+            throw new InvalidPriceException("Price cannot be negative");
+        
+        if (minimumPrice.HasValue && maximumPrice.HasValue && minimumPrice > maximumPrice)
+            throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
+        
+        if (!IsAlertTypeValid(alertType))
+            throw new InvalidAlertTypeException($"The alert type {alertType} does not exist");
+
+        var usersAsString = ReadJsonFileContent(usersFile);
+        var users = JsonConvert.DeserializeObject<List<User>>(usersAsString);
+        var userExists = users.Any(user => user.Id == userId);
+
+        if (!userExists)
+            throw new InvalidUserIdException($"The user {userId} does not exist");
+        
+        var alerts = ReadAlerts();
+        var alert = new Alert(userId, alertType, postalCode, minimumPrice, maximumPrice,
+            minimumRooms,
+            maximumRooms,
+            minimumSquareMeters, maximumSquareMeters);
+        alerts.Add(alert);
+
+        try
+        {
+            File.WriteAllText(alertsFile, JsonConvert.SerializeObject(alerts));
+        }
+        catch (IOException) { }
+
+        if (logger != null)
+        {
+            var data = new Dictionary<string, object>
+            {
+                { "userId", userId },
+                { "alertType", alertType },
+                { "postalCode", postalCode },
+                { "minimumPrice", minimumPrice },
+                { "maximumPrice", maximumPrice },
+                { "minimumRooms", minimumRooms },
+                { "maximumRooms", maximumRooms },
+                { "minimumSquareMeters", minimumSquareMeters },
+                { "maximumSquareMeters", maximumSquareMeters }
+            };
+
+            if (addDateToLogger)
+            {
+                data["date"] = DateTime.Now;
+            }
+
+            logger.Log(data);
         }
     }
 
