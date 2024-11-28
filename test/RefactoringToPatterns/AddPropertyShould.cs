@@ -26,7 +26,7 @@ public class AddPropertyShould: IDisposable
         var addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSenderMock.Object, ALERTS,
             new Mock<SmsSender>().Object, new Mock<PushSender>().Object, null, false);
 
-        addProperty.Execute(123, "New property", "04600", 140_000, 3, 160, 1);
+        addProperty.Execute(new AddPropertyCommand(123, "New property", "04600", 140_000, 3, 160, 1));
 
         var propertiesAsString = File.ReadAllText(PROPERTIES);
         var allProperties = JsonSerializer.Deserialize<Property[]>(propertiesAsString);
@@ -47,8 +47,8 @@ public class AddPropertyShould: IDisposable
     {
         var addProperty = new AddProperty(PROPERTIES, USERS_FILE, new Mock<EmailSender>().Object, ALERTS,
             new Mock<SmsSender>().Object, new Mock<PushSender>().Object, null, false);
-        addProperty.Execute(1, "New property", "04600", 140_000, 3, 160, 1);
-        addProperty.Execute(2, "New property", "04600", 140_000, 3, 160, 1);
+        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 140_000, 3, 160, 1));
+        addProperty.Execute(new AddPropertyCommand(2, "New property", "04600", 140_000, 3, 160, 1));
 
         var propertiesAsString = File.ReadAllText(PROPERTIES);
         var allProperties = JsonSerializer.Deserialize<Property[]>(propertiesAsString);
@@ -61,7 +61,7 @@ public class AddPropertyShould: IDisposable
         var addProperty = new AddProperty(PROPERTIES, USERS_FILE, new Mock<EmailSender>().Object, ALERTS,
             new Mock<SmsSender>().Object, new Mock<PushSender>().Object, null, false);
 
-        Action act = () => addProperty.Execute(1, "New property", "046000", 140_000, 3, 160, 1);
+        Action act = () => addProperty.Execute(new AddPropertyCommand(1, "New property", "046000", 140_000, 3, 160, 1));
 
         act.Should().Throw<InvalidPostalCodeException>().WithMessage("046000 is not a valid postal code");
     }
@@ -72,7 +72,7 @@ public class AddPropertyShould: IDisposable
         var addProperty = new AddProperty(PROPERTIES, USERS_FILE, new Mock<EmailSender>().Object, ALERTS,
             new Mock<SmsSender>().Object, new Mock<PushSender>().Object, null, false);
 
-        Action act = () => addProperty.Execute(1, "New property", "04600", -1, 3, 160, 1);
+        Action act = () => addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", -1, 3, 160, 1));
 
         act.Should().Throw<InvalidPriceException>().WithMessage("Price cannot be negative");
     }
@@ -83,7 +83,7 @@ public class AddPropertyShould: IDisposable
         var addProperty = new AddProperty(PROPERTIES, USERS_FILE, new Mock<EmailSender>().Object, ALERTS,
             new Mock<SmsSender>().Object, new Mock<PushSender>().Object, null, false);
 
-        Action act = () => addProperty.Execute(1, "New property", "04600", 100_000, 3, 160, NON_EXISTING_OWNER);
+        Action act = () => addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, NON_EXISTING_OWNER));
 
         act.Should().Throw<InvalidUserIdException>().WithMessage($"The owner {NON_EXISTING_OWNER} does not exist");
     }
@@ -97,7 +97,7 @@ public class AddPropertyShould: IDisposable
         var addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSenderMock.Object, ALERTS,
             new Mock<SmsSender>().Object, new Mock<PushSender>().Object, null, false);
 
-        addProperty.Execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         emailSenderMock.Verify(x => x.SendEmail(It.Is<Email>(e =>
             e.To == "rDeckard@email.com" &&
@@ -115,7 +115,7 @@ public class AddPropertyShould: IDisposable
         var addProperty = new AddProperty(PROPERTIES, USERS_FILE, new Mock<IEmailSender>().Object, ALERTS,
             smsSenderMock.Object, new Mock<IPushSender>().Object, null, false);
 
-        addProperty.Execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         smsSenderMock.Verify(x => x.SendSMSAlert(It.Is<SmsMessage>(s =>
             s.PhoneNumber == "673777555" &&
@@ -132,7 +132,7 @@ public class AddPropertyShould: IDisposable
         var addProperty = new AddProperty(PROPERTIES, USERS_FILE, new Mock<IEmailSender>().Object, ALERTS,
             new Mock<ISmsSender>().Object, pushSenderMock.Object, null, false);
 
-        addProperty.Execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         pushSenderMock.Verify(x => x.SendPushNotification(It.Is<PushMessage>(p =>
             p.PhoneNumber == "673777555" &&
@@ -147,7 +147,7 @@ public class AddPropertyShould: IDisposable
         var addProperty = new AddProperty(PROPERTIES, USERS_FILE, new Mock<EmailSender>().Object, ALERTS,
             new Mock<SmsSender>().Object, new Mock<PushSender>().Object, loggerMock, false);
 
-        addProperty.Execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         loggerMock.GetLoggedData().Should().HaveCount(1);
         var log = loggerMock.GetLoggedData().First();
@@ -167,7 +167,7 @@ public class AddPropertyShould: IDisposable
         var addProperty = new AddProperty(PROPERTIES, USERS_FILE, new Mock<EmailSender>().Object, ALERTS,
             new Mock<SmsSender>().Object, new Mock<PushSender>().Object, loggerMock, true);
 
-        addProperty.Execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         var loggedData = loggerMock.GetLoggedData().First();
         loggedData.ContainsKey("date").Should().BeTrue();
@@ -180,7 +180,7 @@ public class AddPropertyShould: IDisposable
         var addProperty = new AddProperty(PROPERTIES, USERS_FILE, new Mock<EmailSender>().Object, ALERTS,
             new Mock<SmsSender>().Object, new Mock<PushSender>().Object, loggerMock, false);
 
-        addProperty.Execute(1, "New property", "04600", 100_000, 3, 160, 2);
+        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         var loggedData = loggerMock.GetLoggedData().First();
         loggedData.ContainsKey("date").Should().BeFalse();

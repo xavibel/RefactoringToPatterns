@@ -33,22 +33,21 @@ public class AddProperty
         this.addDateToLogger = addDateToLogger;
     }
 
-    public void Execute(int id, string description, string postalCode, int price, int numberOfRooms, int squareMeters,
-        int ownerId)
+    public void Execute(AddPropertyCommand addPropertyCommand)
     {
-        new PostalCode(postalCode);
-        new Price(price);
+        new PostalCode(addPropertyCommand.PostalCode);
+        new Price(addPropertyCommand.Price);
 
         var usersAsString = ReadJSONFileContent(usersFile);
         var users = JsonConvert.DeserializeObject<List<User>>(usersAsString);
         
-        var user = users.FirstOrDefault(u => u.Id == ownerId);
+        var user = users.FirstOrDefault(u => u.Id == addPropertyCommand.OwnerId);
         if (user == null)
-            throw new InvalidUserIdException("The owner " + ownerId + " does not exist");
+            throw new InvalidUserIdException("The owner " + addPropertyCommand.OwnerId + " does not exist");
 
         var propertiesAsString = ReadJSONFileContent(propertiesFile);
         var allProperties = JsonConvert.DeserializeObject<List<Property>>(propertiesAsString) ?? new List<Property>();
-        var property = new Property(id, description, postalCode, price, numberOfRooms, squareMeters, ownerId);
+        var property = new Property(addPropertyCommand.Id, addPropertyCommand.Description, addPropertyCommand.PostalCode, addPropertyCommand.Price, addPropertyCommand.NumberOfRooms, addPropertyCommand.SquareMeters, addPropertyCommand.OwnerId);
         allProperties.Add(property);
         WritePropertiesFile(allProperties);
 
