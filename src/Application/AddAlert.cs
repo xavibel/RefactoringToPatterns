@@ -54,7 +54,7 @@ public class AddAlert
         new PostalCode(postalCode);
         new Price(minimumPrice);
         new PriceRange(new Price(minimumPrice), new Price(maximumPrice));
-        
+
         if (!IsAlertTypeValid(alertType))
             throw new InvalidAlertTypeException($"The alert type {alertType} does not exist");
 
@@ -64,7 +64,7 @@ public class AddAlert
 
         if (!userExists)
             throw new InvalidUserIdException($"The user {userId} does not exist");
-        
+
         var alerts = ReadAlerts();
         var alert = new Alert(userId, alertType, postalCode, minimumPrice, maximumPrice,
             minimumRooms,
@@ -76,7 +76,9 @@ public class AddAlert
         {
             File.WriteAllText(alertsFile, JsonConvert.SerializeObject(alerts));
         }
-        catch (IOException) { }
+        catch (IOException)
+        {
+        }
 
         if (logger != null)
         {
@@ -103,8 +105,8 @@ public class AddAlert
     }
 
     private List<Alert> ReadAlerts()
-        {
-            var content = ReadJsonFileContent(alertsFile);
-            return JsonConvert.DeserializeObject<List<Alert>>(content) ?? new List<Alert>();
-        }
+    {
+        var content = ReadJsonFileContent(alertsFile);
+        return JsonConvert.DeserializeObject<List<Alert>>(content) ?? new List<Alert>();
     }
+}

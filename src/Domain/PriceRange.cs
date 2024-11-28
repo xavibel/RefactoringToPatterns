@@ -9,7 +9,7 @@ public class PriceRange
     {
         MinPrice = minPrice;
         MaxPrice = maxPrice;
-        if (minPrice.Value() > maxPrice.Value())
+        if (minPrice.Value > maxPrice.Value)
             throw new InvalidPriceException("The minimum price should be bigger than the maximum price");
     }
 }
