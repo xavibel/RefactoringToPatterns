@@ -31,7 +31,7 @@ public class SearchProperty
 
         var properties = allProperties
             .Where(property => code.IsInPostalCode(property.PostalCode))
-            .Where(property => new PriceRange(new Price(minimumPrice), new Price(maximumPrice)).IsInRange(property.Price))
+            .Where(property => PriceRange.FromInt(minimumPrice, maximumPrice).IsInRange(property.Price))
             .Where(property => new RoomRange(minimumRooms, maximumRooms).IsInRange(property.NumberOfRooms))
             .Where(property => new SquareMetersRange(minimumSquareMeters, maximumSquareMeters).IsInRange(property.SquareMeters))
             .ToArray();

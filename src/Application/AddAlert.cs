@@ -53,7 +53,7 @@ public class AddAlert
     {
         new PostalCode(postalCode);
         new Price(minimumPrice);
-        new PriceRange(new Price(minimumPrice), new Price(maximumPrice));
+        PriceRange.FromInt(minimumPrice, maximumPrice);
 
         if (!IsAlertTypeValid(alertType))
             throw new InvalidAlertTypeException($"The alert type {alertType} does not exist");
