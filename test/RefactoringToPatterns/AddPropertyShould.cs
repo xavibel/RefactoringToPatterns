@@ -35,7 +35,7 @@ public class AddPropertyShould: IDisposable
     {
         var addProperty = NewAddProperty();
 
-        addProperty.Execute(addPropertyCommandTestBuilder.Build());
+        addProperty.Execute(addPropertyCommandTestBuilder.WithId(123).Build());
 
         var propertiesAsString = File.ReadAllText(PROPERTIES);
         var allProperties = JsonSerializer.Deserialize<Property[]>(propertiesAsString);
@@ -55,8 +55,8 @@ public class AddPropertyShould: IDisposable
     public void CanStoreMoreThanOneProperty()
     {
         var addProperty = NewAddProperty();
-        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 140_000, 3, 160, 1));
-        addProperty.Execute(new AddPropertyCommand(2, "New property", "04600", 140_000, 3, 160, 1));
+        addProperty.Execute(addPropertyCommandTestBuilder.Build());
+        addProperty.Execute(addPropertyCommandTestBuilder.Build());
 
         var propertiesAsString = File.ReadAllText(PROPERTIES);
         var allProperties = JsonSerializer.Deserialize<Property[]>(propertiesAsString);
@@ -78,7 +78,7 @@ public class AddPropertyShould: IDisposable
     {
         var addProperty = NewAddProperty();
 
-        Action act = () => addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", -1, 3, 160, 1));
+        Action act = () => addProperty.Execute(addPropertyCommandTestBuilder.WithPrice(-1).Build());
 
         act.Should().Throw<InvalidPriceException>().WithMessage("Price cannot be negative");
     }
@@ -88,7 +88,7 @@ public class AddPropertyShould: IDisposable
     {
         var addProperty = NewAddProperty();
 
-        Action act = () => addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, NON_EXISTING_OWNER));
+        Action act = () => addProperty.Execute(addPropertyCommandTestBuilder.WithOwner(NON_EXISTING_OWNER).Build());
 
         act.Should().Throw<InvalidUserIdException>().WithMessage($"The owner {NON_EXISTING_OWNER} does not exist");
     }
@@ -101,7 +101,7 @@ public class AddPropertyShould: IDisposable
         var emailSenderMock = new Mock<IEmailSender>();
         var addProperty = NewAddPropertyWithEmailSender(emailSenderMock.Object);
 
-        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
+        addProperty.Execute(addPropertyCommandTestBuilder.Build());
 
         emailSenderMock.Verify(x => x.SendEmail(It.Is<Email>(e =>
             e.To == "rDeckard@email.com" &&
@@ -118,7 +118,7 @@ public class AddPropertyShould: IDisposable
         var smsSenderMock = new Mock<ISmsSender>();
         var addProperty = NewAddPropertyWithSmsSender(smsSenderMock.Object);
 
-        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
+        addProperty.Execute(addPropertyCommandTestBuilder.Build());
 
         smsSenderMock.Verify(x => x.SendSMSAlert(It.Is<SmsMessage>(s =>
             s.PhoneNumber == "673777555" &&
@@ -134,7 +134,7 @@ public class AddPropertyShould: IDisposable
         var pushSenderMock = new Mock<IPushSender>();
         var addProperty = NewAddPropertyWithPushSender(pushSenderMock.Object);
 
-        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
+        addProperty.Execute(addPropertyCommandTestBuilder.Build());
 
         pushSenderMock.Verify(x => x.SendPushNotification(It.Is<PushMessage>(p =>
             p.PhoneNumber == "673777555" &&
@@ -148,7 +148,7 @@ public class AddPropertyShould: IDisposable
         var loggerMock = new InMemoryLogger();
         var addProperty = NewAddPropertyWithLogger(loggerMock, false);
 
-        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
+        addProperty.Execute(addPropertyCommandTestBuilder.WithPrice(100000).WithOwner(2).Build());
 
         loggerMock.GetLoggedData().Should().HaveCount(1);
         var log = loggerMock.GetLoggedData().First();
@@ -167,7 +167,7 @@ public class AddPropertyShould: IDisposable
         var loggerMock = new InMemoryLogger();
         var addProperty = NewAddPropertyWithLogger(loggerMock, true);
 
-        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
+        addProperty.Execute(addPropertyCommandTestBuilder.WithId(1).Build());
 
         var loggedData = loggerMock.GetLoggedData().First();
         loggedData.ContainsKey("date").Should().BeTrue();
@@ -179,7 +179,7 @@ public class AddPropertyShould: IDisposable
         var loggerMock = new InMemoryLogger();
         var addProperty = NewAddPropertyWithLogger(loggerMock, false);
 
-        addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
+        addProperty.Execute(addPropertyCommandTestBuilder.Build());
 
         var loggedData = loggerMock.GetLoggedData().First();
         loggedData.ContainsKey("date").Should().BeFalse();
