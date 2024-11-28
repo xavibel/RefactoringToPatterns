@@ -31,8 +31,7 @@ public class AddPropertyShould: IDisposable
     [Fact]
     public void NewValidPropertyCanBeRetrieved()
     {
-        var addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
-            smsSender, pushSender, null, false);
+        var addProperty = NewAddProperty();
 
         addProperty.Execute(new AddPropertyCommand(123, "New property", "04600", 140_000, 3, 160, 1));
 
@@ -53,8 +52,7 @@ public class AddPropertyShould: IDisposable
     [Fact]
     public void CanStoreMoreThanOneProperty()
     {
-        var addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
-            smsSender, pushSender, null, false);
+        var addProperty = NewAddProperty();
         addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 140_000, 3, 160, 1));
         addProperty.Execute(new AddPropertyCommand(2, "New property", "04600", 140_000, 3, 160, 1));
 
@@ -66,8 +64,7 @@ public class AddPropertyShould: IDisposable
     [Fact]
     public void FailsWhenThePostalCodeIsNotValid()
     {
-        var addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
-            smsSender, pushSender, null, false);
+        var addProperty = NewAddProperty();
 
         Action act = () => addProperty.Execute(new AddPropertyCommand(1, "New property", "046000", 140_000, 3, 160, 1));
 
@@ -77,8 +74,7 @@ public class AddPropertyShould: IDisposable
     [Fact]
     public void FailsWhenMinimumPriceIsNegative()
     {
-        var addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
-            smsSender, pushSender, null, false);
+        var addProperty = NewAddProperty();
 
         Action act = () => addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", -1, 3, 160, 1));
 
@@ -88,8 +84,7 @@ public class AddPropertyShould: IDisposable
     [Fact]
     public void FailsWhenOwnerDoesNotExist()
     {
-        var addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
-            smsSender, pushSender, null, false);
+        var addProperty = NewAddProperty();
 
         Action act = () => addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, NON_EXISTING_OWNER));
 
@@ -102,8 +97,7 @@ public class AddPropertyShould: IDisposable
         var alert = new Alert(2, "email", "04600", null, null, null, null, null, null);
         File.WriteAllText(ALERTS, JsonSerializer.Serialize(new List<Alert> { alert }));
         var emailSenderMock = new Mock<IEmailSender>();
-        var addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSenderMock.Object, ALERTS,
-            smsSender, pushSender, null, false);
+        var addProperty = NewAddProperty();
 
         addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
@@ -120,8 +114,7 @@ public class AddPropertyShould: IDisposable
         var alert = new Alert(2, "sms", "04600", null, null, null, null, null, null);
         File.WriteAllText(ALERTS, JsonSerializer.Serialize(new List<Alert> { alert }));
         var smsSenderMock = new Mock<ISmsSender>();
-        var addProperty = new AddProperty(PROPERTIES, USERS_FILE, new Mock<IEmailSender>().Object, ALERTS,
-            smsSenderMock.Object, new Mock<IPushSender>().Object, null, false);
+        var addProperty = NewAddProperty();
 
         addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
@@ -137,8 +130,7 @@ public class AddPropertyShould: IDisposable
         var alert = new Alert(2, "push", "04600", null, null, null, null, null, null);
         File.WriteAllText(ALERTS, JsonSerializer.Serialize(new List<Alert> { alert }));
         var pushSenderMock = new Mock<IPushSender>();
-        var addProperty = new AddProperty(PROPERTIES, USERS_FILE, new Mock<IEmailSender>().Object, ALERTS,
-            new Mock<ISmsSender>().Object, pushSenderMock.Object, null, false);
+        var addProperty = NewAddProperty();
 
         addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
@@ -152,8 +144,7 @@ public class AddPropertyShould: IDisposable
     public void LogsTheRequestWhenThereIsALogger()
     {
         var loggerMock = new InMemoryLogger();
-        var addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
-            smsSender, pushSender, loggerMock, false);
+        var addProperty = NewAddPropertyWithLogger(loggerMock, false);
 
         addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
@@ -172,8 +163,7 @@ public class AddPropertyShould: IDisposable
     public void TheLoggedRequestContainsTheDateWhenRequired()
     {
         var loggerMock = new InMemoryLogger();
-        var addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
-            smsSender, pushSender, loggerMock, true);
+        var addProperty = NewAddPropertyWithLogger(loggerMock, true);
 
         addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
@@ -185,13 +175,23 @@ public class AddPropertyShould: IDisposable
     public void TheLoggedRequestDoesNotContainTheDateWhenNotRequired()
     {
         var loggerMock = new InMemoryLogger();
-        var addProperty = new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
-            smsSender, pushSender, loggerMock, false);
+        var addProperty = NewAddPropertyWithLogger(loggerMock, false);
 
         addProperty.Execute(new AddPropertyCommand(1, "New property", "04600", 100_000, 3, 160, 2));
 
         var loggedData = loggerMock.GetLoggedData().First();
         loggedData.ContainsKey("date").Should().BeFalse();
+    }
+
+    private AddProperty NewAddProperty()
+    {
+        return NewAddPropertyWithLogger(null, false);
+    }
+
+    private AddProperty NewAddPropertyWithLogger(InMemoryLogger? loggerMock, bool addDateToLogger)
+    {
+        return new AddProperty(PROPERTIES, USERS_FILE, emailSender, ALERTS,
+            smsSender, pushSender, loggerMock, addDateToLogger);
     }
 
     public void Dispose()
@@ -205,5 +205,4 @@ public class AddPropertyShould: IDisposable
         {
         }
     }
-
 }

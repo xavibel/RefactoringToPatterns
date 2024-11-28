@@ -17,11 +17,11 @@ public class AddProperty
     private readonly string alertsFile;
     private readonly ISmsSender smsSender;
     private readonly IPushSender pushSender;
-    private readonly ILogger logger;
+    private readonly ILogger? logger;
     private readonly bool addDateToLogger;
 
     public AddProperty(string propertiesFile, string usersFile, IEmailSender emailSender, string alertsFile,
-        ISmsSender smsSender, IPushSender pushSender, ILogger logger, bool addDateToLogger)
+        ISmsSender smsSender, IPushSender pushSender, ILogger? logger, bool addDateToLogger)
     {
         this.propertiesFile = propertiesFile;
         this.usersFile = usersFile;
