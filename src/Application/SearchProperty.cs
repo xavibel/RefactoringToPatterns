@@ -23,14 +23,14 @@ public class SearchProperty
 
     public Property[] Search(string postalCode, int? minimumPrice, int? maximumPrice, int? minimumRooms, int? maximumRooms, int? minimumSquareMeters, int? maximumSquareMeters)
     {
-        new PostalCode(postalCode);
+        var code = new PostalCode(postalCode);
         new Price(minimumPrice);
         
         string propertiesAsString = ReadPropertiesFile();
         Property[] allProperties = JsonConvert.DeserializeObject<Property[]>(propertiesAsString);
 
         var properties = allProperties
-            .Where(property => property.PostalCode == postalCode)
+            .Where(property => code.IsInPostalCode(property.PostalCode))
             .Where(property => new PriceRange(new Price(minimumPrice), new Price(maximumPrice)).IsInRange(property.Price))
             .Where(property => new RoomRange(minimumRooms, maximumRooms).IsInRange(property.NumberOfRooms))
             .Where(property => new SquareMetersRange(minimumSquareMeters, maximumSquareMeters).IsInRange(property.SquareMeters))
