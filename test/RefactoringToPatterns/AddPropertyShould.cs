@@ -68,7 +68,7 @@ public class AddPropertyShould: IDisposable
     {
         var addProperty = NewAddProperty();
 
-        Action act = () => addProperty.Execute(new AddPropertyCommand(1, "New property", "046000", 140_000, 3, 160, 1));
+        Action act = () => addProperty.Execute(addPropertyCommandTestBuilder.WithPostalCode("046000").Build());
 
         act.Should().Throw<InvalidPostalCodeException>().WithMessage("046000 is not a valid postal code");
     }
