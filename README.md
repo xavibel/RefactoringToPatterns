@@ -15,3 +15,5 @@
 - AddAlertCommand, AddPropertyCommand, SearchPropertyQuery
 
 # Shared Setup Method
+
+- AddPropertyTest test doubles
