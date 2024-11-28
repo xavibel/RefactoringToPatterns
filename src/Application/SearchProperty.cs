@@ -25,17 +25,15 @@ public class SearchProperty
     {
         new PostalCode(postalCode);
         new Price(minimumPrice);
-        var priceRange = new PriceRange(new Price(minimumPrice), new Price(maximumPrice));
-        var roomRange = new RoomRange(minimumRooms, maximumRooms);
-        var squareMetersRange = new SquareMetersRange(minimumSquareMeters, maximumSquareMeters);
+        
         string propertiesAsString = ReadPropertiesFile();
         Property[] allProperties = JsonConvert.DeserializeObject<Property[]>(propertiesAsString);
 
         var properties = allProperties
             .Where(property => property.PostalCode == postalCode)
-            .Where(property => priceRange.IsInRange(property.Price))
-            .Where(property => roomRange.IsInRange(property.NumberOfRooms))
-            .Where(property => squareMetersRange.IsInRange(property.SquareMeters))
+            .Where(property => new PriceRange(new Price(minimumPrice), new Price(maximumPrice)).IsInRange(property.Price))
+            .Where(property => new RoomRange(minimumRooms, maximumRooms).IsInRange(property.NumberOfRooms))
+            .Where(property => new SquareMetersRange(minimumSquareMeters, maximumSquareMeters).IsInRange(property.SquareMeters))
             .ToArray();
 
         if (logger != null)
